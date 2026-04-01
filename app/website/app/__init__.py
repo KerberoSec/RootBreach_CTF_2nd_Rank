@@ -25,8 +25,8 @@ app.secret_key = secrets.token_hex(32)
 # VULNERABILITY FIXED: #12 - Missing CSRF Protection
 csrf = CSRFProtect(app)
 
-# MySQL configurations
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:hrs_admin_router@db/database'
+# MySQL configurations - use localhost since all services run in one container
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:hrs_admin_router@localhost/database'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 # FIX: Use READ COMMITTED instead of READ UNCOMMITTED to prevent dirty reads
 # VULNERABILITY FIXED: #4 - Database Isolation Level (was READ UNCOMMITTED)

@@ -1,15 +1,13 @@
 # FIX: Removed render_template_string to prevent SSTI vulnerabilities
 # VULNERABILITY FIXED: #11 - Unused Import (render_template_string is dangerous)
-from flask import Flask, render_template, redirect, url_for, request, session, Response
+from flask import render_template, redirect, url_for, request, session, Response
 
 from app import app
 from app.db import db
 from app.models import User
 
-import hashlib
-# FIX: Removed unused imports (time, random, string) and dangerous subprocess
+# FIX: Removed unused imports (time, random, string, hashlib) and dangerous subprocess
 # VULNERABILITY FIXED: #7 - Subprocess Command Execution (removed curl call exposure)
-# import subprocess  # Removed - was exposing internal service hints
 
 # FIX: Import password verification for secure authentication
 # VULNERABILITY FIXED: #10 - Passwords Stored in Plaintext (use werkzeug for verification)
@@ -40,17 +38,15 @@ class SessionError(Exception):
 
 def verify_session():
     """Verify that the current session is valid and user exists."""
+    if not session.get('authenticated'):
+        raise SessionError(message='Not authenticated.')
+    
     user = User.query.filter_by(username=session.get('username')).first()
     if user:
-        # FIX: Use werkzeug's check_password_hash for secure password verification
-        # VULNERABILITY FIXED: #10 - Passwords Stored in Plaintext
-        if session.get('authenticated') and check_password_hash(user.password, session.get('password_raw', '')):
-            # Store user ID in session
-            session['user_id'] = user.id
-            session['session_id'] = session.sid
-            return user
-        else:
-            raise SessionError(message='Wrong password.')
+        # User exists and session is authenticated - return user
+        session['user_id'] = user.id
+        session['session_id'] = session.sid
+        return user
     else:
         raise SessionError(message='Invalid username.')
 
@@ -74,7 +70,6 @@ def login():
         user = User.query.filter_by(username=username).first()
         if user and check_password_hash(user.password, password):
             session['username'] = username
-            session['password_raw'] = password  # Temporarily store for session verification
             session['authenticated'] = True
             session['user_id'] = user.id
             return redirect(url_for('dashboard'))

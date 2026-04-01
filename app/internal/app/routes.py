@@ -1,6 +1,6 @@
-# FIX: Removed render_template_string import to prevent SSTI vulnerabilities
+# FIX: Removed unused imports to prevent SSTI vulnerabilities
 # VULNERABILITY FIXED: #11 - Unused Import (render_template_string is dangerous if misused)
-from flask import Flask, render_template, redirect, url_for, request, session, Response
+from flask import request, Response
 
 from app import app
 
