@@ -1,12 +1,38 @@
-# FIX: Removed unused imports to prevent SSTI vulnerabilities
-# VULNERABILITY FIXED: #11 - Unused Import (render_template_string is dangerous if misused)
-from flask import request, Response
+"""
+Internal Router Routes
+======================
 
+This module provides internal API endpoints for device status information.
+These endpoints are intended to be accessed only through the proxy chain
+(HAProxy with Host: internal.router header).
+
+SECURITY NOTES:
+---------------
+1. This service should NOT be directly accessible from the internet
+2. Access is controlled via HAProxy ACL (Host header check)
+3. The /devices/flag/status endpoint exposes sensitive information
+   - In production, this should have additional authentication
+   - Currently protected by network-level access control only
+
+REMOVED VULNERABILITIES:
+------------------------
+1. Removed render_template_string import (SSTI risk)
+   - render_template_string can execute arbitrary code if user input is passed
+   - Using Response() with static strings is safer
+"""
+
+from flask import request, Response
 from app import app
 
 
 @app.route('/devices', methods=['GET'])
 def get_devices():
+    """
+    Get list of all internal devices and their status.
+    
+    Returns:
+        Response: Plain text listing of all devices
+    """
     response = '''
 Main Chipset Booting Process:
 
@@ -71,6 +97,12 @@ Main chipset initialization complete.
 
 @app.route('/devices/wifi_chipset/status', methods=['GET'])
 def get_wifi_chipset_status():
+    """
+    Get WiFi chipset boot status.
+    
+    Returns:
+        Response: Plain text boot log (status 500 - boot failed)
+    """
     response = '''Welcome to WiFiChipset Bootloader v1.0
 
 Initializing hardware components...
@@ -110,6 +142,12 @@ Initialization failed...
 @app.route('/devices/bluetooth/status', methods=['GET'])
 @app.route('/devices/ethernet/status', methods=['GET'])
 def get_not_available_status():
+    """
+    Get status for devices that are not yet available.
+    
+    Returns:
+        Response: Plain text indicating device not available
+    """
     response = '''
 Chip Booting Process:
 
@@ -129,6 +167,20 @@ Chip status is not available yet.'''
 
 @app.route('/devices/flag/status', methods=['GET'])
 def get_flag_status():
+    """
+    Get flag device status (includes sensitive flag content).
+    
+    SECURITY NOTE:
+    --------------
+    This endpoint exposes the flag file content. In a production environment,
+    this would require additional authentication. Currently protected by:
+    1. Network-level access control (internal.router Host header required)
+    2. HAProxy ACL routing rules
+    
+    Returns:
+        Response: Plain text including flag content
+    """
+    # Read flag from file
     with open('/flag') as flag_file:
         flag_content = flag_file.read()
 

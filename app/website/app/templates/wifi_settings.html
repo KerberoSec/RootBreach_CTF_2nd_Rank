@@ -92,24 +92,22 @@
                 <div class="content">
                     <h1>WiFi Configuration Settings</h1>
                     <form method="POST">
-                        <!-- FIX: Added CSRF token to prevent Cross-Site Request Forgery -->
-                        <!-- VULNERABILITY FIXED: #12 - Missing CSRF Protection -->
                         <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
                         <div class="form-group">
                             <label for="ssid">SSID</label>
-                            <input type="text" class="form-control" id="ssid" placeholder="Enter SSID">
+                            <input type="text" class="form-control" id="ssid" name="ssid" placeholder="Enter SSID" maxlength="32" required>
                         </div>
                         <div class="form-group">
-                            <label for="password">Password</label>
-                            <input type="password" class="form-control" id="password" placeholder="Password">
+                            <label for="wifi_password">Password</label>
+                            <input type="password" class="form-control" id="wifi_password" name="wifi_password" placeholder="Password" maxlength="63">
                         </div>
                         <div class="form-group">
                             <label for="security">Security</label>
-                            <select class="form-control" id="security">
-                                <option>None</option>
-                                <option>WEP</option>
-                                <option>WPA/WPA2 Personal</option>
-                                <option>WPA/WPA2 Enterprise</option>
+                            <select class="form-control" id="security" name="security">
+                                <option value="none">None</option>
+                                <option value="wep">WEP</option>
+                                <option value="wpa2" selected>WPA/WPA2 Personal</option>
+                                <option value="wpa2_enterprise">WPA/WPA2 Enterprise</option>
                             </select>
                         </div>
                         <button type="submit" class="btn btn-primary btn-block mt-3">Save Settings</button>

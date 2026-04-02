@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard</title>
+    <title>Admin Panel</title>
     <link href="{{ url_for('static', filename='css/bootstrap.min.css') }}" rel="stylesheet">
     <style>
         body {
@@ -79,10 +79,21 @@
             </div>
             <div class="col-md-9">
                 <div class="content">
-                    <h1>Here is the flag</h1>
-                    <p class="welcome-message"> 
-                        <code>{{ flag }}</code>
+                    <h1>Admin Panel</h1>
+                    <p class="welcome-message">
+                        Welcome to the Admin Panel! From here you can manage advanced router settings, view system logs, and configure network security policies.
                     </p>
+                    <div class="card mt-4" style="background-color: #333333; border: 1px solid #ff4444;">
+                        <div class="card-header" style="border-bottom: 1px solid #ff4444;">
+                            System Status
+                        </div>
+                        <div class="card-body">
+                            <p><strong>Router Model:</strong> Router XYZ</p>
+                            <p><strong>Firmware Version:</strong> 3.0.2</p>
+                            <p><strong>System Uptime:</strong> Running</p>
+                            <p><strong>Memory Usage:</strong> Normal</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
