@@ -25,9 +25,11 @@ The purpose of this project is to provide a realistic, multi layered target that
 
 ## Background and Purpose
 
-This repository was assembled for a Capture The Flag competition and reflects the source code as it existed after a round of remediation and hardening work was applied to the original, intentionally vulnerable version of the challenge. Throughout the codebase, inline comments have been left in place that describe the specific vulnerability that was originally present, the risk that the vulnerability introduced, and the fix that was applied to address it. These comments are preserved in this repository so that anyone reviewing the code can study both the original weakness and the corrective measure side by side. This makes the repository useful not only as a working challenge environment but also as a reference for common web application and infrastructure security issues and how they can be resolved in a Python Flask, Apache, HAProxy, and mitmproxy based stack.
+This repository documents the work carried out during RootBreach, a Capture The Flag event organized by the Cybersecurity Club of Dr B R Ambedkar National Institute of Technology Jalandhar. As part of the event, the organizers distributed a zip archive containing the source code of a simulated home router administration panel. The archive, as provided, contained a number of intentionally introduced security vulnerabilities spread across its web application code and its infrastructure configuration.
 
-The naming of the repository reflects the outcome of the competition in which this environment or its corresponding solution was used, with the project placing second in the associated event.
+After receiving the archive, the environment was first set up and run locally so that its behavior could be observed directly rather than assumed from reading the code alone. A manual source code review was then carried out across every service in the stack, including the two Flask applications, the Apache configuration, the HAProxy configuration, and the mitmproxy setup, alongside manual penetration testing of the running application to confirm that each suspected weakness was genuinely exploitable. Once the vulnerabilities were identified and understood, each one was fixed directly in the source code. The corrected environment was then rebuilt, tested again to confirm that the fixes held and that the application still functioned correctly, and finally hosted for review. This repository is the exact codebase that was uploaded to GitHub following that process, and the inline comments left throughout the code describe, file by file, the vulnerability that was originally present, the risk it introduced, and the fix that was applied to remove it.
+
+Working through this exercise, the team placed second in the RootBreach CTF event, which is reflected in the name of this repository.
 
 ## System Architecture
 
@@ -79,48 +81,59 @@ The project combines the following technologies.
 
 ```
 RootBreach_CTF_2nd_Rank
-    Dockerfile
-    Makefile
-    docker-compose.yml
-    supervisord.conf
-    app
-        Dockerfile
-        hrs_admin_router-httpd.conf
-        internal
-            requirements.txt
-            run.py
-            internal_router.wsgi
-            app
-                __init__.py
-                routes.py
-        website
-            requirements.txt
-            run.py
-            hrs_admin_router.wsgi
-            app
-                __init__.py
-                db.py
-                models.py
-                routes.py
-                static
-                    css
-                        bootstrap.min.css
-                    js
-                        bootstrap.min.js
-                        jquery-3.5.1.min.js
-                templates
-                    admin_panel.html
-                    dashboard.html
-                    login.html
-                    wifi_settings.html
-    haproxy
-        Dockerfile
-        haproxy.cfg
-    mitmproxy
-        Dockerfile
-    mysql
-        Dockerfile
+│
+├── Dockerfile
+├── Makefile
+├── docker-compose.yml
+├── supervisord.conf
+│
+├── app
+│   ├── Dockerfile
+│   ├── hrs_admin_router-httpd.conf
+│   │
+│   ├── internal
+│   │   ├── requirements.txt
+│   │   ├── run.py
+│   │   ├── internal_router.wsgi
+│   │   └── app
+│   │       ├── __init__.py
+│   │       └── routes.py
+│   │
+│   └── website
+│       ├── requirements.txt
+│       ├── run.py
+│       ├── hrs_admin_router.wsgi
+│       └── app
+│           ├── __init__.py
+│           ├── db.py
+│           ├── models.py
+│           ├── routes.py
+│           │
+│           ├── static
+│           │   ├── css
+│           │   │   └── bootstrap.min.css
+│           │   └── js
+│           │       ├── bootstrap.min.js
+│           │       └── jquery-3.5.1.min.js
+│           │
+│           └── templates
+│               ├── admin_panel.html
+│               ├── dashboard.html
+│               ├── login.html
+│               └── wifi_settings.html
+│
+├── haproxy
+│   ├── Dockerfile
+│   └── haproxy.cfg
+│
+├── mitmproxy
+│   └── Dockerfile
+│
+└── mysql
+    └── Dockerfile
 ```
+
+Each top level folder maps directly to one service in the architecture. The app folder contains both Flask applications together with the Apache configuration that serves them, the haproxy and mitmproxy folders each contain a standalone Dockerfile for their respective proxy service, and the mysql folder contains a standalone Dockerfile for the database service. The root level Dockerfile, docker-compose.yml, and supervisord.conf tie all of these pieces together into a single runnable environment.
 
 ## Component Descriptions
 
