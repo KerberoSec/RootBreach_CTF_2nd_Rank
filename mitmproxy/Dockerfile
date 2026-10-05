@@ -1,12 +1,10 @@
-FROM mitmproxy/mitmproxy:6.0.2
+FROM mitmproxy/mitmproxy:11.0.2
 
-RUN apt-get update && apt-get install -y gettext-base --no-install-recommends && \
-    rm -rf /var/lib/apt/lists/*
+COPY entrypoint.sh /entrypoint.sh
+RUN chmod 0755 /entrypoint.sh
 
-WORKDIR /app
+ENV SERVER_HOSTNAME=127.0.0.1 \
+    SERVER_PORT=80
 
-# Create entrypoint script to substitute environment variables
-RUN echo '#!/bin/sh\nEXEC="mitmdump --mode reverse:http://'"'"'${SERVER_HOSTNAME}:${SERVER_PORT}'"'"' -p 8002 --set block_global=false --no-http2"\neval "$EXEC"' > /entrypoint.sh && \
-    chmod +x /entrypoint.sh
-
-ENTRYPOINT ["/bin/sh", "/entrypoint.sh"]
+EXPOSE 8002
+ENTRYPOINT ["/entrypoint.sh"]

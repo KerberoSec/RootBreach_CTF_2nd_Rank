@@ -3,17 +3,28 @@ services:
     build:
       context: .
       args:
-        - FLAG=flag{test_flag_placeholder}
+        FLAG: ${FLAG:-flag_test_placeholder}
+    init: true
+    restart: unless-stopped
     ports:
-      - "80:80"
       - "8001:8001"
-      - "8002:8002"
-    expose:
-      - 80
-      - 8001
-      - 8002
+    volumes:
+      - database_data:/var/lib/mysql
+      - app_state:/var/lib/hrs_admin_router
     healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:80/"]
+      test:
+        - CMD-SHELL
+        - >-
+          mariadb --user=hrs_app --password=hrs_admin_router --host=127.0.0.1
+          --database=database --execute='SELECT 1' >/dev/null
+          && curl -fsS http://127.0.0.1:80/login >/dev/null
+          && curl -fsS http://127.0.0.1:8001/login >/dev/null
+          && curl -fsS -H 'Host: internal.router' http://127.0.0.1:8001/devices >/dev/null
       timeout: 5s
       retries: 5
       interval: 10s
+      start_period: 90s
+
+volumes:
+  database_data:
+  app_state:

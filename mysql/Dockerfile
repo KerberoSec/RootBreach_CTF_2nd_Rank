@@ -2,5 +2,7 @@ FROM mysql:5.7
 
 ENV MYSQL_ROOT_PASSWORD=hrs_admin_router
 ENV MYSQL_DATABASE=database
+ENV MYSQL_USER=hrs_app
+ENV MYSQL_PASSWORD=hrs_admin_router
 
 EXPOSE 3306

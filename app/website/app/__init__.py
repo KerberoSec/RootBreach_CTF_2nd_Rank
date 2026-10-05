@@ -32,7 +32,6 @@ SECURITY FIXES APPLIED:
 """
 
 from flask import Flask
-from flask_sqlalchemy import SQLAlchemy
 from app.db import db
 from app.models import User
 
@@ -42,6 +41,7 @@ from werkzeug.security import generate_password_hash
 
 import secrets
 import os
+from urllib.parse import quote_plus
 
 
 app = Flask(__name__)
@@ -58,7 +58,17 @@ app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', secrets.token_hex(32))
 # =============================================================================
 # DATABASE CONFIGURATION
 # =============================================================================
-app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:hrs_admin_router@localhost/database'
+database_url = os.environ.get('DATABASE_URL')
+if not database_url:
+    database_user = quote_plus(os.environ.get('DATABASE_USER', 'hrs_app'))
+    database_password = quote_plus(os.environ.get('DATABASE_PASSWORD', 'hrs_admin_router'))
+    database_host = os.environ.get('DATABASE_HOST', '127.0.0.1')
+    database_name = quote_plus(os.environ.get('DATABASE_NAME', 'database'))
+    database_url = (
+        f'mysql+pymysql://{database_user}:{database_password}'
+        f'@{database_host}/{database_name}'
+    )
+app.config['SQLALCHEMY_DATABASE_URI'] = database_url
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 # SECURITY FIX #5: Database Isolation Level
@@ -102,13 +112,15 @@ app.config['WTF_CSRF_TIME_LIMIT'] = 3600  # Token valid for 1 hour
 # SECURITY FIX #6: Correct Extension Initialization Order
 # =============================================================================
 # BUG: CSRF was initialized before Session, causing "CSRF session token missing"
-# FIX: Initialize in correct order: Database -> Tables -> Session -> CSRF
-with app.app_context():
-    db.create_all()  # Create database tables first
-    Session(app)     # Initialize session (must be before CSRF)
+# Initialize the server-side session interface before creating tables. Its
+# SQLAlchemy model must be registered in db.metadata before db.create_all().
+Session(app)
 
-# Initialize CSRF protection AFTER session is configured
+# Initialize CSRF protection AFTER the session interface is configured.
 csrf = CSRFProtect(app)
+
+with app.app_context():
+    db.create_all()
 
 # =============================================================================
 # DEFAULT USER CREATION
